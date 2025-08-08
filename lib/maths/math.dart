@@ -435,7 +435,6 @@ class _MathPageState extends State<MathPage>
               ),
             );
           }
-
           return Image(
             image: imageProvider,
             fit: BoxFit.fill,
