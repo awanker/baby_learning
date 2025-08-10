@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../math.dart';
 import 'page15.dart';
+import 'plus/plus1.dart';
 
 // 故事2 第16页 文本内容（后续可填充）
 const String kStory2Page16Text = '乐乐、朵朵和天天踮着脚尖，眼睛亮晶晶地望着彩虹婆婆，迫不及待地说：“婆婆快出题！”';
@@ -161,7 +162,9 @@ class _Story2Page16State extends State<Story2Page16> with TickerProviderStateMix
             child: GestureDetector(
               onTap: () {
                 // 按钮点击事件处理
-                print('自定义按钮被点击');
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const Plus1Page()),
+                );
               },
                              child: Stack(
                  alignment: Alignment.center,
