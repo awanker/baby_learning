@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:video_player/video_player.dart';
 import 'maths/math.dart';
 
 // Create a shared RouteObserver instance
@@ -56,14 +57,10 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
-  late AnimationController _slideController;
-  late AnimationController _swingController;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _swingAnimation;
+    with WidgetsBindingObserver {
   late FlutterTts _flutterTts;
   late RouteObserver<PageRoute> _routeObserver;
+  late VideoPlayerController _videoController;
 
   @override
   void initState() {
@@ -83,55 +80,21 @@ class _SplashScreenState extends State<SplashScreen>
       DeviceOrientation.landscapeRight,
     ]);
 
-    // 初始化滑动动画控制器
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 2500),
-      vsync: this,
-    );
-
-    // 初始化摇摆动画控制器
-    _swingController = AnimationController(
-      duration: const Duration(milliseconds: 3000),
-      vsync: this,
-    );
-
-    // 创建滑动动画 - 从屏幕下方移动到中间偏上位置
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 2.5), // 从屏幕下方开始
-      end: const Offset(0.0, -1.2), // 停在中间偏上位置
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
-
-    // 创建淡入动画
-    _fadeAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeIn,
-    ));
-
-    // 创建摇摆动画 - 轻微的左右摇摆
-    _swingAnimation = Tween<double>(
-      begin: -0.02, // 轻微向左
-      end: 0.02, // 轻微向右
-    ).animate(CurvedAnimation(
-      parent: _swingController,
-      curve: Curves.easeInOut,
-    ));
+    // 初始化视频背景控制器
+    _videoController = VideoPlayerController.asset('assets/images/babyLearning.mp4');
+    _videoController.setLooping(true);
+    _videoController.setVolume(0.0);
+    _videoController.initialize().then((_) {
+      if (!mounted) return;
+      _videoController.play();
+      setState(() {});
+    });
 
     // 延迟1秒后开始滑动动画和语音播放
     Future.delayed(const Duration(milliseconds: 1000), () {
       if (mounted) {
         // 开始播放语音
         _speakText('听故事，学数学，一起来吧');
-
-        _slideController.forward().then((_) {
-          // 滑动动画完成后开始摇摆动画
-          _swingController.repeat(reverse: true);
-        });
       }
     });
   }
@@ -176,15 +139,17 @@ class _SplashScreenState extends State<SplashScreen>
     // 移除屏幕方向监听器
     WidgetsBinding.instance.removeObserver(this);
 
-    _slideController.dispose();
-    _swingController.dispose();
-
     // 停止TTS播放
     try {
       _flutterTts.stop();
     } catch (e) {
       print('停止TTS时出错: $e');
     }
+
+    // 释放视频控制器
+    try {
+      _videoController.dispose();
+    } catch (_) {}
 
     // 不恢复系统UI，保持全局隐藏设置
     super.dispose();
@@ -198,6 +163,15 @@ class _SplashScreenState extends State<SplashScreen>
     // 当应用恢复时，重新隐藏系统UI
     if (state == AppLifecycleState.resumed) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+      // 恢复视频播放
+      if (_videoController.value.isInitialized) {
+        _videoController.play();
+      }
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      // 暂停视频播放
+      if (_videoController.value.isInitialized) {
+        _videoController.pause();
+      }
     }
   }
 
@@ -207,14 +181,8 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 背景图片 - 填满整个屏幕，包括摄像头区域
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/babyLearning.png',
-              fit: BoxFit.fill,
-              alignment: Alignment.center,
-            ),
-          ),
+          // 背景视频 - 填满整个屏幕，初始化前回退到静态图
+          Positioned.fill(child: _buildVideoBackground()),
           // 内容层 - 直接使用Center，不使用SafeArea
           Center(
             child: Stack(
@@ -247,9 +215,9 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Center(
                         child: ClipOval(
                           child: Image.asset(
-                            'assets/images/play.jpg',
-                            width: 60,
-                            height: 60,
+                            'assets/images/maths/math.png',
+                            width: 160,
+                            height: 160,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -257,49 +225,32 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                 ),
-                // 动画文字 - 从屏幕下方飘进，停在中间偏上位置并摇摆
-                Center(
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: AnimatedBuilder(
-                        animation: _swingController,
-                        builder: (context, child) {
-                          return Transform.translate(
-                            offset:
-                                Offset(_swingAnimation.value * 50, 0), // 轻微左右摇摆
-                            child: Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: const Text(
-                                '听故事，学数学，一起来吧',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      offset: Offset(2.0, 2.0),
-                                      blurRadius: 4.0,
-                                      color: Colors.black,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
+                // 动画文字已移除
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // 构建视频背景
+  Widget _buildVideoBackground() {
+    if (_videoController.value.isInitialized) {
+      return FittedBox(
+        fit: BoxFit.fill,
+        child: SizedBox(
+          width: _videoController.value.size.width,
+          height: _videoController.value.size.height,
+          child: VideoPlayer(_videoController),
+        ),
+      );
+    }
+    // 初始化未完成时显示静态背景
+    return Image.asset(
+      'assets/images/babyLearning.png',
+      fit: BoxFit.fill,
+      alignment: Alignment.center,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import '../main.dart';
 import 'story1/cover.dart';
+import 'story2/cover.dart';
 
 
 
@@ -85,9 +86,53 @@ class _BirdAvatar extends StatelessWidget {
   }
 }
 
-// 提取故事按钮小部件
+// 蘑菇屋故事按钮小部件
 class _StoryButton extends StatelessWidget {
   const _StoryButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+                    onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const Story1CoverPage(),
+                  ),
+                );
+              },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.blue.withOpacity(0.8),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/maths/Moguwu1.png',
+              width: 144,
+              height: 24,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// 新的故事按钮（彩虹森林）
+class _StoryButtonRainbow extends StatelessWidget {
+  const _StoryButtonRainbow();
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +140,7 @@ class _StoryButton extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const Story1CoverPage(),
+            builder: (context) => const Story2CoverPage(),
           ),
         );
       },
@@ -112,22 +157,15 @@ class _StoryButton extends StatelessWidget {
             ),
           ],
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.book,
-              color: Colors.white,
-              size: 24,
-            ),
-            SizedBox(width: 8),
-            Text(
-              '故事',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Image.asset(
+              'assets/images/maths/CaiHongSenLin1.png',
+              width: 144,
+              height: 24,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
             ),
           ],
         ),
@@ -187,6 +225,9 @@ class _MathPageState extends State<MathPage>
     try {
       final imagesToPreload = [
         'assets/images/math.png',
+        'assets/images/maths/Moguwu1.png',
+        'assets/images/maths/story2/cover.png',
+        'assets/images/maths/CaiHongSenLin1.png',
         ...birdImages,
       ];
 
@@ -473,6 +514,11 @@ class _MathPageState extends State<MathPage>
             top: 50,
             right: 20,
             child: _StoryButton(),
+          ),
+          Positioned(
+            top: 120,
+            right: 20,
+            child: _StoryButtonRainbow(),
           ),
         ],
       ),

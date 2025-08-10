@@ -35,6 +35,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  video_player: ^2.9.2
   flutter_tts: ^4.2.3
   # 备用TTS包，如果flutter_tts有问题可以使用
   # flutter_tts: ^3.6.3  # 较老但更稳定的版本
@@ -66,7 +67,9 @@ flutter:
     - assets/images/
     - assets/images/maths/
     - assets/images/maths/story1/
+    - assets/images/maths/story2/
     - assets/audios/
+    - assets/images/babyLearning.mp4
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
