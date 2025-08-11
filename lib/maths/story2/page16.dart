@@ -4,6 +4,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 import '../math.dart';
 import 'page15.dart';
 import 'plus/plus1.dart';
+import 'global_state.dart'; // 导入全局状态管理
+import 'page17.dart'; // 导入page17
 
 // 故事2 第16页 文本内容（后续可填充）
 const String kStory2Page16Text = '乐乐、朵朵和天天踮着脚尖，眼睛亮晶晶地望着彩虹婆婆，迫不及待地说：“婆婆快出题！”';
@@ -118,8 +120,8 @@ class _Story2Page16State extends State<Story2Page16> with TickerProviderStateMix
           ),
           // 返回math页面按钮
           Positioned(
-            top: -40,
-            left: -30,
+            top: -10,
+            left: -10,
             child: GestureDetector(
               onTap: () {
                 Navigator.of(context).pushAndRemoveUntil(
@@ -129,12 +131,25 @@ class _Story2Page16State extends State<Story2Page16> with TickerProviderStateMix
               },
               child: Image.asset(
                 'assets/images/maths/math.png',
-                width: 160,
-                height: 160,
+                width: 80,
+                height: 80,
                 fit: BoxFit.contain,
               ),
             ),
           ),
+
+          // 加法勋章状态显示 - 只在获得勋章时显示
+          if (Story2GlobalState.instance.hasAdditionMedal)
+            Positioned(
+              top: 5,
+              right: 5,
+              child: Image.asset(
+                'assets/images/maths/story2/plus/plus2.png',
+                width: 40,
+                height: 40,
+                fit: BoxFit.contain,
+              ),
+            ),
 
           // 重新朗读按钮
           if (kStory2Page16Text.isNotEmpty)
@@ -161,10 +176,18 @@ class _Story2Page16State extends State<Story2Page16> with TickerProviderStateMix
              left: 30,
             child: GestureDetector(
               onTap: () {
-                // 按钮点击事件处理
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const Plus1Page()),
-                );
+                // 根据加法勋章状态跳转到不同页面
+                if (Story2GlobalState.instance.hasAdditionMedal) {
+                  // 已获得加法勋章，跳转到page17
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const Story2Page17()),
+                  );
+                } else {
+                  // 未获得加法勋章，跳转到plus1
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const Plus1Page()),
+                  );
+                }
               },
                              child: Stack(
                  alignment: Alignment.center,
@@ -246,7 +269,9 @@ class _Story2Page16State extends State<Story2Page16> with TickerProviderStateMix
                     Container(
                       padding: const EdgeInsets.all(8),
                       child: Image.asset(
-                        'assets/images/maths/story2/page16_1_1.png',
+                        Story2GlobalState.instance.hasAdditionMedal
+                            ? 'assets/images/maths/story2/page16_2.png'
+                            : 'assets/images/maths/story2/page16_1_1.png',
                         width: 240,
                         height: 240,
                         fit: BoxFit.contain,

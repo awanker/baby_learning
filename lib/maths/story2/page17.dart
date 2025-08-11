@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../math.dart';
-import 'page12.dart';
-import 'page14.dart';
+import 'page16.dart';
 
-// 故事2 第13页 文本内容（后续可填充）
-const String kStory2Page13Text = '原来这是座会发光的彩虹桥！桥面上还不断蹦出亮晶晶的小泡泡，映出两人惊慌的小脸。';
+// 故事2 第17页 文本内容（后续可填充）
+const String kStory2Page17Text = '';
 
-class Story2Page13 extends StatefulWidget {
-  const Story2Page13({super.key});
+class Story2Page17 extends StatefulWidget {
+  const Story2Page17({super.key});
 
   @override
-  State<Story2Page13> createState() => _Story2Page13State();
+  State<Story2Page17> createState() => _Story2Page17State();
 }
 
-class _Story2Page13State extends State<Story2Page13> {
+class _Story2Page17State extends State<Story2Page17> with WidgetsBindingObserver {
   FlutterTts? _flutterTts;
   bool _isTtsInitialized = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this); // 添加生命周期观察者
     _initTts();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // 移除生命周期观察者
     _flutterTts?.stop();
     super.dispose();
   }
@@ -33,25 +35,36 @@ class _Story2Page13State extends State<Story2Page13> {
   Future<void> _initTts() async {
     _flutterTts = FlutterTts();
     try {
-      await _flutterTts!.setLanguage('zh-CN');
-    } catch (_) {}
-    try {
+      await _flutterTts!.setLanguage("zh-CN");
       await _flutterTts!.setSpeechRate(0.6);
       await _flutterTts!.setVolume(1.0);
       await _flutterTts!.setPitch(1.3);
       setState(() {
         _isTtsInitialized = true;
       });
-      _speakStoryText();
-    } catch (_) {}
+      if (kStory2Page17Text.isNotEmpty) {
+        _speakStoryText();
+      }
+    } catch (e) {
+      print('TTS设置错误: $e');
+    }
   }
 
   Future<void> _speakStoryText() async {
     if (!_isTtsInitialized || _flutterTts == null) return;
-    if (kStory2Page13Text.isEmpty) return;
     try {
-      await _flutterTts!.speak(kStory2Page13Text);
-    } catch (_) {}
+      await _flutterTts!.speak(kStory2Page17Text);
+    } catch (e) {
+      print('朗读故事文本失败: $e');
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    }
   }
 
   @override
@@ -60,13 +73,15 @@ class _Story2Page13State extends State<Story2Page13> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
+          // 背景图片 - page17.png
           Positioned.fill(
             child: Image.asset(
-              'assets/images/maths/story2/page13.png',
+              'assets/images/maths/story2/page17.png',
               fit: BoxFit.fill,
               alignment: Alignment.center,
             ),
           ),
+
           // 返回math页面按钮
           Positioned(
             top: -10,
@@ -87,33 +102,14 @@ class _Story2Page13State extends State<Story2Page13> {
             ),
           ),
 
-          // 重播按钮
-          Positioned(
-            top: 50,
-            right: 20,
-            child: GestureDetector(
-              onTap: _speakStoryText,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                child: const Icon(
-                  Icons.volume_up,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-            ),
-          ),
+          // 上一页按钮（返回page16）
           Align(
             alignment: Alignment.centerLeft,
             child: Padding(
               padding: const EdgeInsets.only(left: 20),
               child: GestureDetector(
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const Story2Page12(),
-                    ),
-                  );
+                  Navigator.of(context).pop();
                 },
                 child: Container(
                   padding: const EdgeInsets.all(12),
@@ -126,74 +122,33 @@ class _Story2Page13State extends State<Story2Page13> {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const Story2Page14(),
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  child: const Icon(
-                    Icons.arrow_forward,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // 文本展示（若有）
-          if (kStory2Page13Text.isNotEmpty)
+
+          // 文本展示（底部居中）
+          if (kStory2Page17Text.isNotEmpty)
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(  
+                  decoration: BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    kStory2Page13Text,
+                    kStory2Page17Text,
                     textAlign: TextAlign.left,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
               ),
             ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 0),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: const Text(
-                  '13',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
-}
-
-
+} 

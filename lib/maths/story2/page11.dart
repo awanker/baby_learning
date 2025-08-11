@@ -69,8 +69,8 @@ class _Story2Page11State extends State<Story2Page11> {
           ),
           // 返回math页面按钮
           Positioned(
-            top: -40,
-            left: -30,
+            top: -10,
+            left: -10,
             child: GestureDetector(
               onTap: () {
                 Navigator.of(context).pushAndRemoveUntil(
@@ -78,11 +78,11 @@ class _Story2Page11State extends State<Story2Page11> {
                   (route) => false,
                 );
               },
-              child: Image.asset(
+                            child: Image.asset(
                 'assets/images/maths/math.png',
-                width: 160,
-                height: 160,
-                fit: BoxFit.contain,  
+                width: 80,
+                height: 80,
+                fit: BoxFit.contain,
               ),
             ),
           ),
